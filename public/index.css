@@ -1,0 +1,13 @@
+body{
+    background: linear-gradient(109.7deg, rgb(202, 50, 50) 5.7%, rgb(252, 195, 12) 92.4%);
+text-align: center;
+margin-top: 100px;
+}
+
+input{
+    font-size: 30px !important;
+}
+select{
+    font-size: 30px !important;
+
+}

@@ -1,0 +1,28 @@
+body{
+    background-image: url('https://wallpapers.com/images/hd/profile-picture-background-v3l1jfakc8kgmvg6.jpg');
+
+}
+
+
+div{
+    border-radius: 10px;
+    font-size: 10px;
+    color:whitesmoke ;
+    text-align: center;
+    background-color: aliceblue;
+    border: 2px solid burlywood;
+    margin-left: 40%;
+    margin-right: 40%;
+    margin-top: 40px;
+    padding-bottom: 70px;
+    padding-left: 0px;
+    padding-right: 0px;
+    background-image: url('https://www.teahub.io/photos/full/282-2820540_background-image-for-html-page.jpg');
+}
+img{
+    border: 3px solid goldenrod;
+    border-radius: 30%;
+    height: 120px;
+    width: 120px;
+    margin-top: 20%;
+}

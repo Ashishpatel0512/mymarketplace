@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/general.css">
+</head>
+<body>
+    <div>
+    <img src="<%= data.image.url %>" class="rounded mx-auto d-block" alt="...">
+    <form action="/upload/<%= data._id %>" method="post" enctype="multipart/form-data">
+        &nbsp;
+        &nbsp;
+        &nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        
+
+<input type="file" name="image"><br><br>
+        <input type="submit" value="upload">
+    </form>
+    <h1>name:<%= data.name %></h1>
+    <h1>Email:<%= data.emailid %></h1>
+    </div>
+</body>
+</html>

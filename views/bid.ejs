@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/bid.css">
+
+</head>
+<body>
+   
+
+    <form action="/listings/bidings/<%=id %>/<%=userid %>" method="post"><br>
+        <h4>bidamount:</h4><input type="number" name="[bidamount]"  class="card-img-top "><br><br>
+        <h4>message:</h4><input type="text" name="[message]"  class="card-img-top "><br><br>
+        <!-- aama direct user name je use karto hoy tenu name lakhavu -->
+        <h4>buyer:</h4><input type="text" name="[buyer]" class="card-img-top "><br><br>              
+        <h4>contact:</h4><input type="text" name="[contact]" class="card-img-top "><br><br>
+<h4>seller:</h4><input type="text" name="[seller]" class="card-img-top " value=" <%= prouser.name %>"><br><br>
+
+       <input type="submit" value="submit">
+      
+      </form>
+</body>
+</html>

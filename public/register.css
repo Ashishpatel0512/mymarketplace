@@ -1,0 +1,31 @@
+body{
+    margin-top: 200px;
+    text-align: center !important;
+background-color: aliceblue;
+}
+
+input{
+    font-size:20px;
+    border:2px solid rgba(0, 0, 0, 0.474);
+    border-radius: 3px;
+}
+div{
+    border: 2px solid rgba(0, 0, 0, 0.396);
+    margin-left: 40%;
+    margin-right: 40%;
+    background-color: rgb(111, 111, 238);
+    padding-top: 40px;
+    padding-bottom: 40px;
+    border-radius: 15px;
+}
+h2{
+    text-align: center !important;
+    text-decoration: underline;
+    color: rgb(111, 111, 238);
+    
+
+}
+
+.file{
+    width:200px;
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/index.css">
+
+</head>
+<body>
+    <form action="/index/<%=userid %>" method="post" enctype="multipart/form-data">
+    <input type="text" name="listing[name]" placeholder="name"><br><br>
+    <input type="text" name="listing[description]" placeholder="description"><br><br>
+    <input type="file" name="listing[image]" placeholder="url"><br><br>
+    <input type="number" name="listing[price]" placeholder="price"><br><br>
+    <select class="form-select" aria-label="Default select example"  name="listing[catagory]"><br><br>
+        <option value="electronic">electronic</option>
+        <option value="funicher">funicher</option>>
+        <option value="vehicals">vehicals</option>>
+          <option value="other">other</option>
+      </select>
+      <input type="number" name="listing[age]" placeholder="age"><br><br>
+
+    <select class="form-select" aria-label="Default select example"  name="listing[other]"><br><br>
+        <option value="box">box</option>
+        <option value="box">gerenty</option>
+        <option value="box">warenty</option>
+        <option value="box">other</option>
+
+      </select>
+      
+
+    <input type="submit" value="submit"><br><br>
+    
+</form>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        
+    </style>
+</head>
+<body>
+    
+    <% for(no of data) {%>
+        <h6><%= data[0].createAt.toString().slice(0,10)%></h6>
+        <h4><%= data[0].message %></h4>
+
+            <form action="/notify/delete/<%=data[0].id %>?_method=delete" method="get">
+                <input type="submit" value="delete">
+            </form>
+    <% } %>
+</body>
+</html>

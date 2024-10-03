@@ -1,0 +1,16 @@
+body{
+    background-color: aliceblue;
+    margin-top: 30px;
+    text-align: center !important;
+
+}
+a{
+    text-decoration: none;
+    color: white;
+    font-size: 30px;
+    border: 2px solid white;
+    background-color: rgb(12, 54, 114);
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+}

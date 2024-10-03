@@ -1,0 +1,33 @@
+
+    body{
+        background-color: rgb(12, 54, 114) !important;
+        padding-top: 30px;
+       text-align: center !important;
+     }
+
+    
+
+th,td{
+background-color: transparent !important;
+    color: white !important;
+    
+}
+
+.btn{
+    background-color:wheat!important;
+    
+}
+.title{
+    text-decoration: none;
+    color:  rgb(12, 54, 114);
+    font-size: 30px;
+    border: 2px solid white;
+    background-color:aliceblue;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+}
+
+table{
+    margin-top: 30px !important;
+}
