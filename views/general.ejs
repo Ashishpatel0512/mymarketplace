@@ -9,7 +9,7 @@
 <body>
     <div>
     <img src="<%= data.image.url %>" class="rounded mx-auto d-block" alt="...">
-    <form action="/upload/<%= data._id %>" method="post" enctype="multipart/form-data">
+    <form action="/upload" method="post" enctype="multipart/form-data">
         &nbsp;
         &nbsp;
         &nbsp;&nbsp;
@@ -33,11 +33,11 @@
         &nbsp;
         
 
-<input type="file" name="image"><br><br>
+        <input type="file" name="image"><br><br>
         <input type="submit" value="upload">
-    </form>
-    <h1>name:<%= data.name %></h1>
-    <h1>Email:<%= data.emailid %></h1>
+      </form>
+      <h1>name:<%= data.username %></h1>
+       <h1>Email:<%= data.emailid %></h1>
     </div>
 </body>
 </html>

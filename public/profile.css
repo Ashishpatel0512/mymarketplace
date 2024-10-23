@@ -1,16 +1,16 @@
 body{
-    background-color: aliceblue;
-    margin-top: 30px;
+    background-color: aliceblue !important;
+    margin-top: 30px !important;
     text-align: center !important;
 
 }
 a{
-    text-decoration: none;
-    color: white;
-    font-size: 30px;
-    border: 2px solid white;
-    background-color: rgb(12, 54, 114);
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 10px;
+    text-decoration: none !important;
+    color: white !important;
+    font-size: 30px !important;
+    border: 2px solid white !important;
+    background-color: rgb(12, 54, 114) !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important; 
+    border-radius: 10px !important;
 }

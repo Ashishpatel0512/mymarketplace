@@ -3,7 +3,8 @@ background-color: aliceblue;
 }
 .products{
     height: 20rem !important;
-    margin-bottom: 100px !important;
+    margin-bottom: 150px !important;
+    
 }
 
 .pimg{
@@ -22,7 +23,7 @@ h4{
     opacity: 0.7;
 }
 
-h2{
+/* h2{
     color: rgba(0, 0, 0, 0.588) !important;
 }
 .navbar-brand{
@@ -31,8 +32,8 @@ h2{
 }
 .navbar {
     background: linear-gradient(110.3deg, rgb(18, 121, 217) 8.7%, rgb(77, 174, 216) 47.5%, rgb(27, 137, 188) 89.1%) !important;
-}
-.profile{
+} */
+/* .profile{
     border-radius: 30px;
     padding-left: 20px;
     padding-right: 20px;
@@ -46,7 +47,19 @@ h2{
 }
 i{
     color: black;
+} */
+
+#sell{
+ border:3px solid #ffff00 !important;
+ background-color: #ffff00 !important;
+ border-radius: 50px !important;
+ padding-top:2px;
+ padding-bottom:2px;
+
+ margin-top: 12px;
+ color: black;
 }
+
 
 
 #price{
@@ -66,3 +79,46 @@ opacity:0.9 !important;
     margin-left: 25% !important;
     margin-right: 10% !important;
 }
+
+
+
+/* ////////////// */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+ 
+  
+  .topnav {
+    overflow: hidden;
+    background: linear-gradient(110.3deg, rgb(18, 121, 217) 8.7%, rgb(77, 174, 216) 47.5%, rgb(27, 137, 188) 89.1%) !important;
+position: relative;
+  }
+  
+  .topnav #myLinks {
+    display: none;
+  }
+  
+  .topnav a {
+    float: left;
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+  }
+  
+  .topnav a.icon {
+    float: right;
+  }
+  
+  .topnav a:hover {
+    background-color: #ddd;
+    color: black;
+  }
+  
+  .active {
+    background-color: linear-gradient(110.3deg, rgb(18, 121, 217) 8.7%, rgb(77, 174, 216) 47.5%, rgb(27, 137, 188) 89.1%) !important;
+
+    color:white !important;
+    font-size: large !important;
+  }

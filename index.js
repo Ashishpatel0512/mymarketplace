@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+var cors = require('cors')
 
 const express = require('express');
 const app = express();
@@ -25,13 +26,16 @@ const upload = multer({ storage })
 const session=require("express-session")
 const wrapAsync=require("./utils/wrapAsyc.js")
 const ExpressError=require("./utils/ExpressError.js");
+const listRoute=require("./routers/indexrouter.js");
 const { receiveMessageOnPort } = require('worker_threads');
-// const { error, clear } = require('console');
-// // const {listingSchema}=require("./schema.js")
-// const wrapAsync=require("./utility/wrapasync.js")
-// const ExpressError=require("./utility/error.js");
-// const reviews= require("./models/review.js");
+const flash=require("connect-flash");
 
+
+
+const passport=require("passport")
+const localstrategy=require("passport-local")
+const {isLoggedIn}=require("./middleware.js");
+const { error } = require('console');
 
 
 main().then(() => {
@@ -53,10 +57,40 @@ app.use(express.json());
 app.use(methodoverride("_method"));
 app.engine('ejs', engine);
 app.use(express.static(path.join(__dirname, "/public")));
-app.use(cookieParser())
-app.use(session({secret:"mysecret",resave:false,saveUninitialized:true}))
+app.use(cookieParser());
+app.use(cors())
+mongoose.set('strictPopulate', false)
+const sessionOption={
+  secret:"mysupersecretcode",
+  resave:false,
+  saveUninitialized:true,
+  cookie:{
+    expires:Date.now()+7*24*60*60*1000,
+    maxAge:7*24*60*60*1000,
+    httpOnly:true
+  }
+}
+
+app.use(session(sessionOption));
+app.use(flash());
 
 
+
+app.use((req,res,next)=>{
+  res.locals.msg=req.flash("success");
+  res.locals.error=req.flash("error");
+  next();
+});
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new localstrategy(Users.authenticate()));
+
+passport.serializeUser(Users.serializeUser());
+passport.deserializeUser(Users.deserializeUser());
+
+app.use("/",listRoute)
 //create notify clientside
 app.get("/notify",wrapAsync(async(req,res)=>{
 
@@ -83,18 +117,28 @@ app.get("/notify/delete/:id", wrapAsync(async (req,res)=>{
 
 
 //bids form
-app.get("/bids/:id/:productuser/:userid", (req, res) => {
-  let { id, productuser, userid } = req.params;
+app.get("/bids/:id/:productuser", isLoggedIn,(req, res) => {
+  let { id, productuser } = req.params;
   let productuserdata = Users.findById(productuser).then((prouser) => {
     console.log(prouser)
-    res.render("bid.ejs", { id: id, userid: userid, prouser: prouser,})
+    res.render("bid.ejs", { id: id,  prouser: prouser,})
 
   })
   // console.log(id+""+name)
   // res.render("bid.ejs",{id:id,name:name,userid:userid})
 })
 
+app.get('/logout', function(req, res, next) {
+  req.logout(function(req,err) {
+    if (err) { 
+      console.log(req.user);
 
+      return next(err);
+      
+     }
+     res.redirect("/show");
+  });
+});
 
 //login form...
 
@@ -103,18 +147,18 @@ app.get("/login", (req, res) => {
 })
 
 
-app.post("/login",wrapAsync(async (req, res) => {
+app.post("/login",passport.authenticate("local",{ failureRedirect:"/login",failureFlash:true}),wrapAsync(async (req, res) => {
 
 
-  let { emailid, password } = req.body;
-  console.log(emailid + "" + password)
+  let { username, password } = req.body;
+  console.log(username + "" + password)
 
   let info;
-  let admin1 = await Users.find({ emailid: emailid, password: password ,role:"Admin"}).then((data) => {
+  let admin1 = await Users.find({ username: username ,role:"Admin"}).then((data) => {
     console.log(data)
     //new added
     if (data == "") {
-      let user = Users.find({ emailid: emailid, password: password }).then((data) => {
+      let user = Users.find({ username: username, role:"User" }).then((data) => {
         console.log(data)
         d = data[0];
         console.log(d)
@@ -122,7 +166,8 @@ app.post("/login",wrapAsync(async (req, res) => {
           res.send("not register please register after login")
         }
         if(d.status=="Block"){
-          res.send("THIS ACCOUNT IS BLOCK..")
+          req.flash("error","THIS USER IS BLOCKKED");
+           return res.redirect("/login");
         }
         res.cookie("data", d).redirect("/show");
 
@@ -168,119 +213,146 @@ app.post("/resister",wrapAsync(async (req, res) => {
 // console.log(req.file.filename+","+req.file.path)
 // let filename=req.file.filename;
 // let url=req.file.path;
-
-
+try {
+  
   let {name,emailid,password}= req.body;
   console.log(name+","+emailid+","+password)
   // console.log(User)
-  let newuser = new Users({name,emailid,password})
-  // newuser.image.push({url,filename});
-  let id;
+  let newuser = new Users({emailid,username:name})
+
+  let registereUser= await Users.register(newuser,`${password}`)
+  console.log("this is register user...."+registereUser);
+
   newuser.save().then((data) => {
     console.log("this is id" + data._id)
     id = data._id;
   });
 
-  let list = await Listing.find({});
-  console.log(list)
+  req.login(registereUser, function(err) {
+  if (err) { return next(err); }
+   req.flash("success","welcome to reviveMart");
+   return res.redirect("/show");
+});
 
-  let a;
-  Users.findById(id).then((data) => {
-    console.log("this is user" + data)
-    res.cookie("data", data).redirect("/show");
-    // res.redirect("/show")
-    // res.render("home.ejs",{list,data})
-  })
-  // let newListing= new Listing({...req.body.listing})
-  // newListing.save();
+} catch (error) {
+  req.flash("error",error.message);
+  res.redirect("/resis");
+}
 
-  //res.redirect("/show")
+  
+
+  // // newuser.image.push({url,filename});
+  // let id;
+  // newuser.save().then((data) => {
+  //   console.log("this is id" + data._id)
+  //   id = data._id;
+  // });
+
+  // let list = await Listing.find({});
+  // //console.log(list)
+
+  // let a;
+  // Users.findById(id).then((data) => {
+  //   console.log("this is user" + data);
+  //   req.flash("success","welcome to reviveMart");
+
+  //   req.session.data= data._id;
+  //   res.cookie("data", data).redirect("/show");
+  //   // res.redirect("/show")
+  //   // res.render("home.ejs",{list,data})
+  // })
+  // // let newListing= new Listing({...req.body.listing})
+  // // newListing.save();
+
+  // //res.redirect("/show")
 
 }))
+// jyare routes kaam n kare tyare niche nu comments hatai levi //..........................................................
+// //form new add 
+// app.get("/add/:id", wrapAsync(async(req, res) => {
+//   let { id } = req.params;
+//   console.log(id)
+//   res.render("profile.ejs", { id });
+// }))
 
-//form new add 
-app.get("/add/:id", wrapAsync(async(req, res) => {
-  let { id } = req.params;
-  console.log(id)
-  res.render("profile.ejs", { id });
-}))
+// ///add new listings
+// app.post('/index/:id',upload.single('listing[image]'), wrapAsync(async (req, res) => {
+// console.log(req.file.filename+","+req.file.path)
+// let filename=req.file.filename;
+// let url=req.file.path;
+//   let id = req.params.id;
+//   let d;
+//   let user;
+//   let User = await Users.findById(id).then((data) => {
+//     d = data;
+//    user=data.name;
+//   })
 
-///add new listings
-app.post('/index/:id',upload.single('listing[image]'), wrapAsync(async (req, res) => {
-console.log(req.file.filename+","+req.file.path)
-let filename=req.file.filename;
-let url=req.file.path;
-  let id = req.params.id;
-  let d;
-  let user;
-  let User = await Users.findById(id).then((data) => {
-    d = data;
-   user=data.name;
-  })
+//   let newListing = new Listing({ ...req.body.listing, User })
+//   //newListing.save();
+//   newListing.image.push({url,filename})
+//   newListing.User.push(d)
+//   newListing.save();
 
-  let newListing = new Listing({ ...req.body.listing, User })
-  //newListing.save();
-  newListing.image.push({url,filename})
-  newListing.User.push(d)
-  newListing.save();
+//    let notification=Notify.insertMany({
+//     receiver:"admin",
+//     message:`${user} add new please check in`
+//    })
 
-   let notification=Notify.insertMany({
-    receiver:"admin",
-    message:`${user} add new please check in`
-   })
+//   res.redirect(`/add/${id}`);
+// }))
+// //delete products
 
-  res.redirect(`/add/${id}`);
-}))
-//delete products
+// app.get("/delete/:id", wrapAsync(async (req,res)=>{
+//   let id=req.params.id;
+//   console.log(id)
+//   let del= await Listing.findByIdAndDelete(id).then((data)=>{
+//     console.log(data)
+//   })
+//   res.send("delete for this item");
+// }))
 
-app.get("/delete/:id", wrapAsync(async (req,res)=>{
-  let id=req.params.id;
-  console.log(id)
-  let del= await Listing.findByIdAndDelete(id).then((data)=>{
-    console.log(data)
-  })
-  res.send("delete for this item");
-}))
+// //edit product
+// app.get("/edit/:id", wrapAsync(async (req,res)=>{
+//   let id=req.params.id;
+//   await Listing.findById(id).then((data)=>{
+//     console.log(data)
+//     res.render("edit.ejs",{data})
+//   })
+// }))
 
-//edit product
-app.get("/edit/:id", wrapAsync(async (req,res)=>{
-  let id=req.params.id;
-  await Listing.findById(id).then((data)=>{
-    console.log(data)
-    res.render("edit.ejs",{data})
-  })
-}))
+// //UPDATE
 
-//UPDATE
-
-app.post('/update/:id',upload.single('listing[image]'), wrapAsync(async (req, res) => {
-  console.log(req.file.filename+","+req.file.path)
-  let filename=req.file.filename;
-  let url=req.file.path;
-    let id = req.params.id;
-    let d;
+// app.post('/update/:id',upload.single('listing[image]'), wrapAsync(async (req, res) => {
+//   console.log(req.file.filename+","+req.file.path)
+//   let filename=req.file.filename;
+//   let url=req.file.path;
+//     let id = req.params.id;
+//     let d;
     
   
-    let newListing =  await Listing.findByIdAndUpdate(id,{ ...req.body.listing}).then((data)=>{
+//     let newListing =  await Listing.findByIdAndUpdate(id,{ ...req.body.listing}).then((data)=>{
       
-      console.log("this is data"+data.image[0].id)
+//       console.log("this is data"+data.image[0].id)
       
-    })
-   Listing.findById(id).then((data)=>{
-    console.log(data);
-   data.image[0]={url,filename};
-   data.save();
+//     })
+//    Listing.findById(id).then((data)=>{
+//     console.log(data);
+//    data.image[0]={url,filename};
+//    data.save();
   
-  });
+//   });
   
-res.redirect(`/edit/${id}`)
+// res.redirect(`/edit/${id}`)
     
-  }))
-
+//   }))
+//...............................ahi sudhi hatavi comments kaam n kare to j routes ok........................................
 //home page
 app.get('/show', wrapAsync(async (req, res) => {
-  let data = (req.cookies.data)
-  console.log(data)
+
+console.log("this sesssion id....."+req.session.data)
+  // let data = (req.cookies.data)
+  // console.log(data)
 
   //advertize
   let ads;
@@ -298,43 +370,51 @@ app.get('/show', wrapAsync(async (req, res) => {
   console.log("this is item"+req.session.item)
  // res.locals.item=req.session.item;
   //advertize ahi sudhi
-  id = data._id;
-console.log("this is idddddddddd"+id)
+//   id = data._id;
+// console.log("this is idddddddddd"+id)
 
-  let list = await Listing.find({ status: "Approve" });
+  let list = await Listing.find({ status: "Approve"});
   console.log(list)
-  console.log(data)
+  // console.log(data)
   
-  let admin1 = await Users.find({ _id: id ,role:"Admin"}).then((d) => {
-    if (d != "") {
-      data = d[0]
-      console.log("this is datassssssssssssssssssssssssssssssssssssssssss")
-      console.log(data)
-      let isAdmin = "true";
-      res.render("home.ejs", { list, data, isAdmin,ads})//{list})
- }
- else{
-  console.log(data)
-  let isAdmin = "false"
+//   let admin1 = await Users.find({ _id: id ,role:"Admin"}).then((d) => {
+//     if (d != "") {
+//       data = d[0]
+//       console.log("this is datassssssssssssssssssssssssssssssssssssssssss")
+//       console.log(data)
+//       let isAdmin = "true";
+//       res.render("home.ejs", { list, data, isAdmin,ads})//{list})
+//  }
+//  else{
+//   console.log("this is testing datas..................")
+//   console.log(data)
+//   let isAdmin = "false"
   // let newListing= new Listing({...req.body.listing})
   // newListing.save();
+  
   console.log(ads)
-  res.render("home.ejs", { list, data, isAdmin,ads })//{list})
+  let data=req.user;
+  console.log(data);
+  if(data==undefined){
+    
+    data=null
+  }
+  res.render("home.ejs", { list, data,ads })//{list})
  }
-  })
+  
 
 // console.log(data)
 //   let isAdmin = "false"
 //   // let newListing= new Listing({...req.body.listing})
 //   // newListing.save();
 //   res.render("home.ejs", { list, data, isAdmin })//{list})
-}))
+))
 
 //show page
-app.get('/listings/:id/:userid', wrapAsync(async (req, res) => {
+app.get('/listings/:id', wrapAsync(async (req, res) => {
   
 let bidings;
-  let { id, userid } = req.params;
+  let { id } = req.params;
   let listing = await Listing.findById(id);
   console.log(listing)
   let bids = await biding.find({ "Productid": id }).populate("Productid").then((bid) => {
@@ -351,8 +431,9 @@ let bidings;
     //})
      //let item=data.image[0].url;
      //req.session.item=item;
-
-    res.render("show.ejs", { listing, userid, data ,bidings})
+     
+    //  res.json(listing)
+    res.render("show.ejs", { listing, data ,bidings})
 
   });
 
@@ -363,20 +444,20 @@ let bidings;
 }));
 
 ///bidings
-app.post("/listings/bidings/:id/:userid", wrapAsync(async (req, res) => {
-  let userid = req.params.userid
+app.post("/listings/bidings/:id",isLoggedIn, wrapAsync(async (req, res) => {
+  let userid = req.user._id;
 
   let d;
   let info;
-  let User = Users.findById(req.params.userid).then((data) => {
-    d = data;
-  })
+  // let User = Users.findById(req.params.userid).then((data) => {
+    d = req.user;
+  // })
   let listing = await Listing.findById(req.params.id).then((ListingData)=>{
 info=ListingData;
   })
   let id = req.params.id
   let bidings = req.body;
-  let newbidings = new biding(bidings, User,listing);
+  let newbidings = new biding(bidings, d,listing);
   newbidings.User.push(d);
   newbidings.Productid=info;
 
@@ -384,32 +465,39 @@ info=ListingData;
   // listing.bidings.push(newbidings);
   await newbidings.save()
   // await listing.save()
-  res.redirect(`/listings/${id}/${userid}`)
+  res.redirect(`/listings/${id}`)
 }))
 
 
 // PROFILE..................................................................................................................................
 
-app.get("/user/products/:userid",wrapAsync(async (req, res) => {
-  let userid = req.params.userid;
+app.get("/user/products",isLoggedIn,wrapAsync(async (req, res) => {
+  let userid = req.user._id;
   let product = Listing.find({ "User": userid }).then((data) => {
     console.log(data)
     res.render("product.ejs", { userid, data })
   })
 }));
 
-app.get("/user/mybids/:userid",wrapAsync(async (req, res) => {
-  let userid = req.params.userid;
-  let bids = await biding.find({ "User": userid }).populate("Productid").then((bid) => {
+app.get("/user/mybids",isLoggedIn,wrapAsync(async (req, res) => {
+  let userid = req.user._id;
+  let user;
+    Users.findById(userid).then((users)=>{
+      console.log(users)
+      user=users
+    });
+  let bids = await biding.find({ "User": userid }).populate("Productid")
+  .then((bid) => {
     console.log(bid);
-    res.render("mybid.ejs", { bid })
+    
+    res.render("mybid.ejs", { bid,user })
 
   })
 
 
 }))
 //show bids
-app.get("/showbids/:id",wrapAsync(async(req,res)=>{
+app.get("/showbids/:id",isLoggedIn,wrapAsync(async(req,res)=>{
   let {id}=req.params;
   let listing = await biding.find({"Productid":id }).populate("Productid").then((data)=>{
     console.log(data)
@@ -417,8 +505,8 @@ app.get("/showbids/:id",wrapAsync(async(req,res)=>{
   });
 }))
 
-app.get("/user/general/:id", wrapAsync( async(req, res) => {
-  let {id}=req.params;
+app.get("/user/general", wrapAsync( async(req, res) => {
+  let id=req.user._id;
   await Users.findById(id).then((data)=>{
   console.log(data)
   res.render("general.ejs",{data})
@@ -428,69 +516,67 @@ app.get("/user/general/:id", wrapAsync( async(req, res) => {
 
 
 // upload image
-app.post('/upload/:id',upload.single('image'), wrapAsync(async (req, res) => {
+app.post('/upload',upload.single('image'), wrapAsync(async (req, res) => {
   console.log(req.file.filename+","+req.file.path)
   let filename=req.file.filename;
   let url=req.file.path;
-    let id = req.params.id;
-    let d;
+    let id = req.user._id;
+    
     
   
     let newListing =  await Users.findByIdAndUpdate(id)
 
     newListing.image={url,filename}
   newListing.save()
-res.redirect(`/user/general/${id}`)    
+res.redirect(`/user/general`)    
   }))
 
 // new
 
 
-app.get("/new/:userid", wrapAsync((req, res) => {
-  let userid = req.params.userid
-  res.render("index.ejs", { userid })
+app.get("/new", isLoggedIn,wrapAsync((req, res) => {
+  res.render("index.ejs")
 }))
 
 
 //admin panle
-app.get("/admin/:adminid", wrapAsync(async (req, res) => {
-  let { adminid } = req.params;
-    res.render("adminprofile.ejs", { adminid })
+app.get("/admin", wrapAsync(async (req, res) => {
+  
+    res.render("adminprofile.ejs")
   }));
 
 
-app.get("/products/:adminid",wrapAsync( async (req, res) => {
-  let { adminid } = req.params;
+app.get("/products",isLoggedIn,wrapAsync( async (req, res) => {
+  
   let product = await Listing.find().populate("User").then((data) => {
     console.log(data)
-
-    //res.render("show.ejs",{listing,userid,data})
-    res.render("admin.ejs", { data, adminid })
+    res.render("admin.ejs", {data})
   });
 
 }))
 
-app.put("/approve/:_id/:adminid", wrapAsync(async (req, res) => {
-  let { _id, adminid } = req.params;
+app.put("/approve/:_id",isLoggedIn, wrapAsync(async (req, res) => {
+  let { _id } = req.params;
+  
   console.log(_id)
   let product = await Listing.findByIdAndUpdate(_id, { status: "Approve" }).then((data) => {
     console.log(data)
-    res.redirect(`/products/${adminid}`)
+    res.redirect(`/products`)
   })
 
 }))
-app.put("/reject/:_id/:adminid", wrapAsync(async (req, res) => {
-  let { _id, adminid } = req.params;
+app.put("/reject/:_id/",isLoggedIn, wrapAsync(async (req, res) => {
+  let { _id } = req.params;
   console.log(_id)
   let product = await Listing.findByIdAndUpdate(_id, { status: "Reject" }).then((data) => {
     console.log(data)
-    res.redirect(`/products/${adminid}`)
+    res.redirect(`/products`)
   })
 
 }))
 
 //user data for admin side
-app.get("/userdata",wrapAsync(async(req,res)=>{
+app.get("/userdata", isLoggedIn,wrapAsync(async(req,res)=>{
   let user= await Users.find().then((data)=>{
     console.log(data)
     res.render("users.ejs",{data})
@@ -499,7 +585,7 @@ app.get("/userdata",wrapAsync(async(req,res)=>{
 
 
 //block user and user all listings for admin
-app.put("/block/:_id/", wrapAsync(async (req, res) => {
+app.put("/block/:_id/", isLoggedIn,wrapAsync(async (req, res) => {
   let {_id} = req.params;
   console.log(_id)
   let product = await Users.findByIdAndUpdate(_id, { status: "Block" }).then((data) => {
@@ -531,6 +617,10 @@ app.post("/ads",upload.single('image'),wrapAsync((req,res)=>{
   newads.save()
   res.send("ads...")
 }))
+
+
+
+
 
 app.all("*",(req,res,next)=>{
   next(new ExpressError(404,"somethig went wrong please try again"))

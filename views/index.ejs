@@ -5,21 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="/index.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 </head>
 <body>
-    <form action="/index/<%=userid %>" method="post" enctype="multipart/form-data">
-    <input type="text" name="listing[name]" placeholder="name"><br><br>
-    <input type="text" name="listing[description]" placeholder="description"><br><br>
-    <input type="file" name="listing[image]" placeholder="url"><br><br>
-    <input type="number" name="listing[price]" placeholder="price"><br><br>
+
+  <div>
+    <h1>Add New Listing</h1>
+    <form action="/index" method="post" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="name" class="form-lable">Name</label>
+        <input type="text" name="listing[name]" placeholder="enter name" class="form-control" required><br>
+        <div class="invalid-feedback">
+           Please choose a title
+         </div>
+     </div>
+     <div class="mb-3">
+      <label for="description" class="form-lable">Description</label>
+      <input type="text" name="listing[description]" placeholder="enter description" class="form-control" required><br>
+      <div class="invalid-feedback">
+         Please choose a description
+       </div>
+   </div>
+    <div class="mb-3">
+      <label for="formFile" class="form-label">Default file input example</label>
+      <input class="form-control" type="file" id="formFile" name="listing[image]">
+    </div>
+    <div class="mb-3">
+      <label for="price" class="form-lable">price</label>
+      <input type="number" name="listing[price]" placeholder="enter price" class="form-control" required><br>
+      <div class="invalid-feedback">
+         Please choose a price
+       </div>
+   </div>
     <select class="form-select" aria-label="Default select example"  name="listing[catagory]"><br><br>
         <option value="electronic">electronic</option>
         <option value="funicher">funicher</option>>
         <option value="vehicals">vehicals</option>>
           <option value="other">other</option>
       </select>
-      <input type="number" name="listing[age]" placeholder="age"><br><br>
+      <div class="mb-3">
+        <label for="age" class="form-lable">age</label>
+        <input type="number" name="listing[age]" placeholder="enter age" class="form-control" required><br>
+        <div class="invalid-feedback">
+           Please choose a age
+         </div>
+     </div>
 
     <select class="form-select" aria-label="Default select example"  name="listing[other]"><br><br>
         <option value="box">box</option>
@@ -30,8 +62,11 @@
       </select>
       
 
-    <input type="submit" value="submit"><br><br>
+    <input type="submit" value="SELL"><br><br>
     
 </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
 </body>
 </html>

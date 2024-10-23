@@ -1,13 +1,17 @@
 body{
-    background: linear-gradient(109.7deg, rgb(202, 50, 50) 5.7%, rgb(252, 195, 12) 92.4%);
-text-align: center;
-margin-top: 100px;
+    background:white !important;
+text-align: center !important;
+margin-right: 370px !important;
+margin-left: 370px !important;
+margin-top: 50px !important;
+
 }
 
-input{
-    font-size: 30px !important;
+form{
+    border: 2px solid gray;
+    background-color: aliceblue;
+    border-radius: 20px !important;
 }
-select{
-    font-size: 30px !important;
-
+.hide{
+    display:none !important;
 }
